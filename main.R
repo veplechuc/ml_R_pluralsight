@@ -108,3 +108,35 @@ nrow(testDataFiltered)/(nrow(testDataFiltered) + nrow(trainDataFiltered))
 install.packages('e1071', dependencies=TRUE)
 #ARR_DEL15 ~ . = all columns except the one on the left of ~ are used to predict the value
 logisticRegModel = train(ARR_DEL15 ~ ., data = trainDataFiltered, method="glm", family="binomial")
+
+#now predict using the test set
+logRegPrediction = predict(logisticRegModel, testDataFiltered)
+
+#using confision matrix function to evaluate how well the model predicts flyght delays
+logRegConfMat = confusionMatrix(logRegPrediction, testDataFiltered[,"ARR_DEL15"])
+
+#see result
+logRegConfMat
+
+#need to impruve performance
+#options.. adding columns or adjust training setting or select better algorithm
+
+#load random forest
+#trainDataFiltered[-1] exclude the colum from the data, 
+#trainDataFiltered$ARR_DEL15 name of the data we try to obtain
+rfModel = randomForest(trainDataFiltered[-1], trainDataFiltered$ARR_DEL15, proximity = TRUE, importance = TRUE)
+
+#now using the model to predict with test
+rfValidation = predict(rfModel, testDataFiltered)
+
+#using confision matrix function to evaluate how well the model predicts flyght delays
+rfConfMat = confusionMatrix(rfValidation, testDataFiltered[,"ARR_DEL15"])
+
+rfConfMat
+
+#new performance.. adjust, better algorithm rethink the problem
+#adding weather data ... and go to filtering and start all over again...
+
+
+
+
