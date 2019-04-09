@@ -63,5 +63,48 @@ tapply(onTimeData$ARR_DEL15, onTimeData$ARR_DEL15, length)
 # compute the 
 (6460/(25664+6460))
 
+# factor and decision criteria for algorithm selection could vary
+# the course uses this factors:
+#   learning type -> based on statemnt => prediction model => supervised machine learning
+#   result - regresion (continuos values)  clasification(descrete values) => classification => delay or not
+#   complexity  -> then keep it simple -> eliminate enemble algorithm
+#   basic vs enhanced -> basic(since it is our first approach)-> choose between Naive Bayes, Logistic regression, decision tree
 
+# logistic regression algorthm
+# training process -> retrain if needed
 
+#training process ->(select)  with the minimun features (columns) include the column to be predicted
+#install caret package
+
+#set the seed to habe the same starting point each time
+set.seed(122515)
+
+#setting the feature columns
+featureCols = c("ARR_DEL15","DAY_OF_WEEK", "OP_CARRIER_AIRLINE_ID", "DEST", "ORIGIN", "DEP_TIME_BLK")
+
+#create a set only with those colums
+onTimeDataFiltered = onTimeData[,featureCols]
+
+#spliting data => ensure that arr_del15(the column that we try to predict) ratio are the same on trining and testing
+#list = false is one item per row
+inTrainRows = createDataPartition(onTimeDataFiltered$ARR_DEL15, p=0.7, list = FALSE)
+
+#checks the rows
+head(inTrainRows, 10)
+
+#select the training data based on the intrarow vector -> select the 70% of the data
+trainDataFiltered = onTimeDataFiltered[inTrainRows,]
+
+#select the training data based on the intrarow vector -> select the 30% of the data (put "-")
+testDataFiltered = onTimeDataFiltered[-inTrainRows,]
+
+#before apply the algorith verify the proportion if it is accurate
+nrow(trainDataFiltered)/(nrow(testDataFiltered) + nrow(trainDataFiltered))
+#now for testing
+nrow(testDataFiltered)/(nrow(testDataFiltered) + nrow(trainDataFiltered))
+
+#NOW TRAIN THE MODEL
+# in case of error run 
+install.packages('e1071', dependencies=TRUE)
+#ARR_DEL15 ~ . = all columns except the one on the left of ~ are used to predict the value
+logisticRegModel = train(ARR_DEL15 ~ ., data = trainDataFiltered, method="glm", family="binomial")
