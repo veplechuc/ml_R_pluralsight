@@ -14,14 +14,25 @@
 
 
 # orig <- read.csv2('data/774523976_T_ONTIME_REPORTING.csv', sep = ',', header = TRUE, stringsAsFactors = FALSE)
-orig = read.csv2('/dev/repos/R/ml_pluralsightcourse/data/774523976_T_ONTIME_REPORTING.csv', sep = ',', header = TRUE, stringsAsFactors = FALSE)
+#orig = read.csv2('/dev/repos/R/ml_pluralsightcourse/data/774523976_T_ONTIME_REPORTING.csv', sep = ',', header = TRUE, stringsAsFactors = FALSE)
+#complete data 
+orig = read.csv2('/dev/repos/R/ml_pluralsightcourse/data/complete_data_w_wheater_column.csv', sep = ',', header = TRUE, stringsAsFactors = FALSE)
 
-# nrow(orig)
+nrow(orig)
+
+#filtering airports
 airports <- c('ATL', 'LAX', 'ORD', 'DFW', 'JFK', 'SFO', 'CLT', 'LAS', 'PHX')
+
+airports
+
 orig <- subset(orig, DEST %in% airports & ORIGIN %in% airports)
+
+orig
+
 orig$X = NULL 
 
 tail(orig, 2)
+
 #checking correlation
 cor(orig[c('DEST_AIRPORT_SEQ_ID', 'DEST_AIRPORT_ID')])
 
@@ -35,7 +46,7 @@ orig$ORIGIN_AIRPORT_SEQ_ID <-NULL
 #molding data
 # checking for data  if the is in the right format or NAN
 onTimeData= orig[!is.na(orig$ARR_DEL15) & orig$ARR_DEL15!="" & !is.na(orig$DEP_DEL15) & orig$DEP_DEL15!="",]
-
+onTimeData
 # checking for differences on the original an the filtered
 nrow(orig)
 nrow(ontime)
@@ -57,6 +68,8 @@ onTimeData$ORIGIN = as.factor(onTimeData$ORIGIN)
 onTimeData$DEP_TIME_BLK = as.factor(onTimeData$DEP_TIME_BLK)
 onTimeData$OP_UNIQUE_CARRIER = as.factor(onTimeData$OP_UNIQUE_CARRIER)
 
+onTimeData
+
 # checking data how many times arrdelay is true and false
 tapply(onTimeData$ARR_DEL15, onTimeData$ARR_DEL15, length)
 
@@ -76,7 +89,7 @@ tapply(onTimeData$ARR_DEL15, onTimeData$ARR_DEL15, length)
 #training process ->(select)  with the minimun features (columns) include the column to be predicted
 #install caret package
 
-#set the seed to habe the same starting point each time
+#set the seed to able the same starting point each time
 set.seed(122515)
 
 #setting the feature columns
@@ -84,11 +97,12 @@ featureCols = c("ARR_DEL15","DAY_OF_WEEK", "OP_CARRIER_AIRLINE_ID", "DEST", "ORI
 
 #create a set only with those colums
 onTimeDataFiltered = onTimeData[,featureCols]
+onTimeDataFiltered
 
 #spliting data => ensure that arr_del15(the column that we try to predict) ratio are the same on trining and testing
 #list = false is one item per row
 inTrainRows = createDataPartition(onTimeDataFiltered$ARR_DEL15, p=0.7, list = FALSE)
-
+inTrainRows
 #checks the rows
 head(inTrainRows, 10)
 
@@ -111,14 +125,14 @@ logisticRegModel = train(ARR_DEL15 ~ ., data = trainDataFiltered, method="glm", 
 
 #now predict using the test set
 logRegPrediction = predict(logisticRegModel, testDataFiltered)
-
-#using confision matrix function to evaluate how well the model predicts flyght delays
+logRegPrediction
+#using confusion matrix function to evaluate how well the model predicts flyght delays
 logRegConfMat = confusionMatrix(logRegPrediction, testDataFiltered[,"ARR_DEL15"])
 
 #see result
 logRegConfMat
 
-#need to impruve performance
+#need to improve performance
 #options.. adding columns or adjust training setting or select better algorithm
 
 #load random forest
